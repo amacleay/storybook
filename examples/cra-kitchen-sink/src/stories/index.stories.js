@@ -7,6 +7,7 @@ import { withNotes } from '@storybook/addon-notes';
 import centered from '@storybook/addon-centered';
 import { withInfo } from '@storybook/addon-info';
 import { Button } from '@storybook/react/demo';
+import PropTypes from 'prop-types';
 
 import App from '../App';
 import Container from './Container';
@@ -77,6 +78,69 @@ storiesOf('Button', module)
         </div>
       ))
     )
+  );
+
+const now = new Date();
+const IsFridayContext = React.createContext(now.getDay() === 5);
+
+storiesOf('Context - no decorator', module).add(
+  'with info with a consumer',
+  withInfo('Is it Friday?')(() => (
+    <IsFridayContext.Provider>
+      <IsFridayContext.Consumer>
+        {isFriday =>
+          isFriday ? (
+            <a href="https://www.youtube.com/watch?v=kfVsfOSbJY0">It's friday</a>
+          ) : (
+            "It's a miserable day"
+          )
+        }
+      </IsFridayContext.Consumer>
+    </IsFridayContext.Provider>
+  ))
+);
+class DayPicker extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { day: now.getDay() };
+    this.handleDayChange = this.handleDayChange.bind(this);
+  }
+  handleDayChange(e) {
+    this.setState({ day: e.target.value });
+  }
+  render() {
+    return (
+      <div>
+        <select value={this.state.day} onChange={this.handleDayChange}>
+          {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(
+            (name, index) => <option value={index}>{name}</option>
+          )}
+        </select>
+        <IsFridayContext.Provider value={Number(this.state.day) === 5}>
+          {React.Children.only(this.props.children)}
+        </IsFridayContext.Provider>
+      </div>
+    );
+  }
+}
+DayPicker.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+storiesOf('Context - decorator', module)
+  .addDecorator(story => <DayPicker>{story()}</DayPicker>)
+  .add(
+    'with info with a consumer',
+    withInfo('Is it Friday?')(() => (
+      <IsFridayContext.Consumer>
+        {isFriday =>
+          isFriday ? (
+            <a href="https://www.youtube.com/watch?v=kfVsfOSbJY0">It's friday</a>
+          ) : (
+            "It's a miserable day"
+          )
+        }
+      </IsFridayContext.Consumer>
+    ))
   );
 
 storiesOf('App', module).add('full app', () => <App />);
