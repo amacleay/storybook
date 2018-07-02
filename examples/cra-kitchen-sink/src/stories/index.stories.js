@@ -30,6 +30,8 @@ const InfoButton = () => (
   </span>
 );
 
+const PassthroughRenderProp = ({ children }) => children();
+
 storiesOf('Button', module)
   .addDecorator(withNotes)
   .add('with text', () => (
@@ -65,6 +67,19 @@ storiesOf('Button', module)
         {setOptions({ selectedAddonPanel: 'storybook/info/info-panel' })}
         click the <InfoButton /> label in top right for info about "{context.story}"
       </Container>
+    ))
+  )
+  .add(
+    'with info and a render prop',
+    withInfo('The source code should be visible')(() => (
+      <PassthroughRenderProp>
+        {() => (
+          <div>
+            <span>Check it</span>
+            Shouldn't my source code be visible?
+          </div>
+        )}
+      </PassthroughRenderProp>
     ))
   )
   .add(
